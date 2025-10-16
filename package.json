@@ -1,0 +1,21 @@
+{
+  "name": "text-to-video-generator",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "jest",
+    "export": "next export"
+  },
+  "dependencies": {
+    "next": "13.0.0",
+    "react": "18.0.0",
+    "react-dom": "18.0.0",
+    "axios": "^1.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "@testing-library/react": "^13.0.0"
+  }
+}
