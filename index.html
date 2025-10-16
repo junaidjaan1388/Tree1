@@ -1,21 +1,624 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Free Video Generator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Video Generator | Free AI Video Creation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #6d28d9;
+            --primary-dark: #5b21b6;
+            --secondary: #f1f5f9;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline:hover {
+            background: rgba(109, 40, 217, 0.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, #f0f4ff, #e6f0ff);
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Generator Section */
+        .generator-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .input-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .output-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .prompt-input {
+            width: 100%;
+            min-height: 150px;
+            padding: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            resize: vertical;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            transition: border 0.3s;
+        }
+
+        .prompt-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .options {
+            margin-bottom: 1.5rem;
+        }
+
+        .option-group {
+            margin-bottom: 1rem;
+        }
+
+        .option-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .select-box, .input-box {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .generate-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .video-placeholder {
+            flex: 1;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            min-height: 300px;
+        }
+
+        .video-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #cbd5e1;
+        }
+
+        .video-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .video-controls .btn {
+            flex: 1;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 4rem 0;
+            background: var(--white);
+            border-radius: 30px 30px 0 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--text-light);
+        }
+
+        /* Footer */
+        footer {
+            background: #1e293b;
+            color: white;
+            padding: 3rem 0 1.5rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-column h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid #334155;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .generator-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .auth-buttons {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Text to Video Generator</h1>
-    <form action="/generate" method="post">
-        <input type="text" name="prompt" placeholder="Enter your video prompt..." style="width: 300px;" required>
-        <button type="submit">Generate Video</button>
-    </form>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <div class="logo-icon">V</div>
+                    <span>VidGenAI</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#">Home</a>
+                    <a href="#">Features</a>
+                    <a href="#">Examples</a>
+                    <a href="#">Pricing</a>
+                    <a href="#">Blog</a>
+                </div>
+                <div class="auth-buttons">
+                    <button class="btn btn-outline">Log In</button>
+                    <button class="btn btn-primary">Sign Up Free</button>
+                </div>
+            </nav>
+        </div>
+    </header>
 
-    {% if video_url %}
-    <h2>Your Generated Video:</h2>
-    <video width="512" controls>
-        <source src="{{ video_url }}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-    {% endif %}
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Transform Text into Stunning Videos</h1>
+            <p>Create professional videos in minutes with our AI-powered text-to-video generator. No design skills required.</p>
+            <button class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1.1rem;">Try It Free</button>
+        </div>
+    </section>
+
+    <!-- Generator Section -->
+    <div class="container">
+        <div class="generator-container">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2 class="section-title">Create Your Video</h2>
+                <textarea class="prompt-input" placeholder="Describe the video you want to create...">A serene mountain landscape at sunrise with a flowing river in the foreground, cinematic style</textarea>
+                
+                <div class="options">
+                    <div class="option-group">
+                        <label class="option-label">Style</label>
+                        <select class="select-box">
+                            <option>Realistic</option>
+                            <option>Cinematic</option>
+                            <option>Animated</option>
+                            <option>Artistic</option>
+                            <option>Minimalist</option>
+                        </select>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label class="option-label">Duration</label>
+                        <select class="select-box">
+                            <option>10 seconds</option>
+                            <option>15 seconds</option>
+                            <option>30 seconds</option>
+                            <option>60 seconds</option>
+                        </select>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label class="option-label">Aspect Ratio</label>
+                        <select class="select-box">
+                            <option>16:9 (Landscape)</option>
+                            <option>9:16 (Portrait)</option>
+                            <option>1:1 (Square)</option>
+                            <option>21:9 (Cinematic)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="generate-btn" id="generateBtn">
+                    <span>Generate Video</span>
+                    <span id="loadingSpinner" style="display: none;">⏳</span>
+                </button>
+            </div>
+            
+            <!-- Output Section -->
+            <div class="output-section">
+                <h2 class="section-title">Your Generated Video</h2>
+                <div class="video-placeholder" id="videoPlaceholder">
+                    <div class="video-icon">🎬</div>
+                    <p>Your video will appear here</p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">Enter a prompt and click "Generate Video"</p>
+                </div>
+                
+                <div class="video-controls">
+                    <button class="btn btn-outline">Download</button>
+                    <button class="btn btn-primary">Share</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Powerful Features</h2>
+                <p>Everything you need to create amazing videos with AI</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Generate high-quality videos in seconds, not hours. Our optimized AI models deliver results quickly.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Multiple Styles</h3>
+                    <p>Choose from various artistic styles including realistic, cinematic, animated, and artistic.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>All Formats</h3>
+                    <p>Create videos in any aspect ratio for social media, websites, presentations, and more.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Commercial Rights</h3>
+                    <p>Use your generated videos anywhere - personal projects, social media, or commercial use.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Easy Editing</h3>
+                    <p>Regenerate videos with modified prompts or make quick adjustments to your creations.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3>Cloud Storage</h3>
+                    <p>Your videos are safely stored in the cloud. Access and download them anytime, anywhere.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>VidGenAI</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Press</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Product</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Examples</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">API</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Community</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Legal</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                        <li><a href="#">GDPR</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 VidGenAI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple simulation of video generation
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const btn = this;
+            const spinner = document.getElementById('loadingSpinner');
+            const videoPlaceholder = document.getElementById('videoPlaceholder');
+            
+            // Show loading state
+            btn.disabled = true;
+            spinner.style.display = 'inline';
+            btn.innerHTML = '<span>Generating...</span> <span>⏳</span>';
+            
+            // Simulate API call delay
+            setTimeout(function() {
+                // Reset button
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btn.innerHTML = '<span>Generate Video</span>';
+                
+                // Update video placeholder to show "generated" state
+                videoPlaceholder.innerHTML = `
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🎥</div>
+                            <p>Your Video is Ready!</p>
+                            <p style="font-size: 0.9rem; font-weight: normal; margin-top: 0.5rem;">Click play to preview</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Show a success message
+                alert('Video generated successfully! This is a frontend simulation. In a real application, this would connect to an AI video generation API.');
+            }, 3000);
+        });
+    </script>
 </body>
 </html>
