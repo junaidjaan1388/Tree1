@@ -1,0 +1,111 @@
+name: Text-to-Video Generation CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Text prompt for video generation'
+        required: true
+        type: string
+
+env:
+  NODE_VERSION: '18.x'
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cpu
+
+    - name: Install Node.js dependencies
+      run: npm install
+
+    - name: Run tests
+      run: |
+        python -m pytest tests/ -v
+        npm test
+
+    - name: Build application
+      run: npm run build
+
+  generate-video:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install diffusers transformers accelerate torch
+
+    - name: Generate video from text
+      run: |
+        python scripts/generate_video.py --prompt "${{ github.event.inputs.prompt }}"
+      env:
+        HUGGINGFACE_HUB_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+
+    - name: Upload generated video
+      uses: actions/upload-artifact@v4
+      with:
+        name: generated-video
+        path: outputs/
+        retention-days: 7
+
+  deploy:
+    needs: [build-and-test, generate-video]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Build and export
+      run: |
+        npm install
+        npm run build
+        npm run export
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./out
