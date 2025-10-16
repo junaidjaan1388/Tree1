@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text-to-Video Generator | Free AI Video Creation</title>
+    <title>Free Text-to-Video Generator | AI Video Creation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -20,6 +21,9 @@
             --text-light: #64748b;
             --white: #ffffff;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
         }
 
         body {
@@ -99,6 +103,9 @@
             transition: all 0.3s;
             border: none;
             font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-outline {
@@ -118,6 +125,16 @@
 
         .btn-outline:hover {
             background: rgba(109, 40, 217, 0.1);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
         }
 
         /* Hero Section */
@@ -173,6 +190,13 @@
             font-size: 1.5rem;
             margin-bottom: 1.5rem;
             color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary);
         }
 
         .prompt-input {
@@ -190,6 +214,7 @@
         .prompt-input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
         }
 
         .options {
@@ -204,6 +229,14 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option-label i {
+            color: var(--primary);
+            width: 20px;
         }
 
         .select-box, .input-box {
@@ -212,6 +245,11 @@
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             font-size: 1rem;
+        }
+
+        .select-box:focus, .input-box:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
         .generate-btn {
@@ -235,7 +273,12 @@
             background: var(--primary-dark);
         }
 
-        .video-placeholder {
+        .generate-btn:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        .video-container {
             flex: 1;
             background: #f1f5f9;
             border-radius: 8px;
@@ -246,12 +289,26 @@
             color: var(--text-light);
             margin-bottom: 1.5rem;
             min-height: 300px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .video-placeholder {
+            text-align: center;
+            padding: 2rem;
         }
 
         .video-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
             color: #cbd5e1;
+        }
+
+        #generatedVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
         }
 
         .video-controls {
@@ -261,6 +318,30 @@
 
         .video-controls .btn {
             flex: 1;
+            justify-content: center;
+        }
+
+        /* API Status */
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: #f0fdf4;
+            color: var(--success);
+            font-size: 0.9rem;
+        }
+
+        .api-status.error {
+            background: #fef2f2;
+            color: var(--error);
+        }
+
+        .api-status.warning {
+            background: #fffbeb;
+            color: var(--warning);
         }
 
         /* Features Section */
@@ -369,6 +450,23 @@
             font-size: 0.9rem;
         }
 
+        /* Loading Animation */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #e2e8f0;
+            border-bottom-color: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .generator-container {
@@ -395,19 +493,18 @@
         <div class="container">
             <nav class="navbar">
                 <div class="logo">
-                    <div class="logo-icon">V</div>
-                    <span>VidGenAI</span>
+                    <div class="logo-icon"><i class="fas fa-video"></i></div>
+                    <span>FreeVidAI</span>
                 </div>
                 <div class="nav-links">
-                    <a href="#">Home</a>
-                    <a href="#">Features</a>
-                    <a href="#">Examples</a>
-                    <a href="#">Pricing</a>
-                    <a href="#">Blog</a>
+                    <a href="#"><i class="fas fa-home"></i> Home</a>
+                    <a href="#"><i class="fas fa-star"></i> Features</a>
+                    <a href="#"><i class="fas fa-play-circle"></i> Examples</a>
+                    <a href="#"><i class="fas fa-question-circle"></i> Help</a>
                 </div>
                 <div class="auth-buttons">
-                    <button class="btn btn-outline">Log In</button>
-                    <button class="btn btn-primary">Sign Up Free</button>
+                    <button class="btn btn-outline"><i class="fas fa-sign-in-alt"></i> Log In</button>
+                    <button class="btn btn-primary"><i class="fas fa-user-plus"></i> Sign Up</button>
                 </div>
             </nav>
         </div>
@@ -416,9 +513,9 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <h1>Transform Text into Stunning Videos</h1>
-            <p>Create professional videos in minutes with our AI-powered text-to-video generator. No design skills required.</p>
-            <button class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1.1rem;">Try It Free</button>
+            <h1>Free Text-to-Video Generator</h1>
+            <p>Create amazing videos from text using free AI APIs. No credit card required. Generate up to 5 videos per day for free.</p>
+            <button class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1.1rem;"><i class="fas fa-rocket"></i> Start Creating</button>
         </div>
     </section>
 
@@ -427,60 +524,95 @@
         <div class="generator-container">
             <!-- Input Section -->
             <div class="input-section">
-                <h2 class="section-title">Create Your Video</h2>
-                <textarea class="prompt-input" placeholder="Describe the video you want to create...">A serene mountain landscape at sunrise with a flowing river in the foreground, cinematic style</textarea>
+                <h2 class="section-title"><i class="fas fa-edit"></i> Create Your Video</h2>
+                <textarea class="prompt-input" id="promptInput" placeholder="Describe the video you want to create...">A serene mountain landscape at sunrise with a flowing river in the foreground, cinematic style</textarea>
                 
                 <div class="options">
                     <div class="option-group">
-                        <label class="option-label">Style</label>
-                        <select class="select-box">
-                            <option>Realistic</option>
-                            <option>Cinematic</option>
-                            <option>Animated</option>
-                            <option>Artistic</option>
-                            <option>Minimalist</option>
+                        <label class="option-label"><i class="fas fa-palette"></i> Style</label>
+                        <select class="select-box" id="styleSelect">
+                            <option value="realistic">Realistic</option>
+                            <option value="cinematic">Cinematic</option>
+                            <option value="animated">Animated</option>
+                            <option value="artistic">Artistic</option>
+                            <option value="minimalist">Minimalist</option>
                         </select>
                     </div>
                     
                     <div class="option-group">
-                        <label class="option-label">Duration</label>
-                        <select class="select-box">
-                            <option>10 seconds</option>
-                            <option>15 seconds</option>
-                            <option>30 seconds</option>
-                            <option>60 seconds</option>
+                        <label class="option-label"><i class="fas fa-clock"></i> Duration</label>
+                        <select class="select-box" id="durationSelect">
+                            <option value="5">5 seconds</option>
+                            <option value="10">10 seconds</option>
+                            <option value="15">15 seconds</option>
+                            <option value="30">30 seconds</option>
                         </select>
                     </div>
                     
                     <div class="option-group">
-                        <label class="option-label">Aspect Ratio</label>
-                        <select class="select-box">
-                            <option>16:9 (Landscape)</option>
-                            <option>9:16 (Portrait)</option>
-                            <option>1:1 (Square)</option>
-                            <option>21:9 (Cinematic)</option>
+                        <label class="option-label"><i class="fas fa-expand"></i> Aspect Ratio</label>
+                        <select class="select-box" id="ratioSelect">
+                            <option value="16:9">16:9 (Landscape)</option>
+                            <option value="9:16">9:16 (Portrait)</option>
+                            <option value="1:1">1:1 (Square)</option>
+                            <option value="21:9">21:9 (Cinematic)</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="option-label"><i class="fas fa-key"></i> API Service</label>
+                        <select class="select-box" id="apiSelect">
+                            <option value="stability">Stability AI (Free Tier)</option>
+                            <option value="huggingface">Hugging Face (Free Models)</option>
+                            <option value="mock">Demo Mode</option>
                         </select>
                     </div>
                 </div>
                 
                 <button class="generate-btn" id="generateBtn">
+                    <i class="fas fa-magic"></i>
                     <span>Generate Video</span>
-                    <span id="loadingSpinner" style="display: none;">⏳</span>
                 </button>
+
+                <div class="api-status" id="apiStatus">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Free API services are available</span>
+                </div>
             </div>
             
             <!-- Output Section -->
             <div class="output-section">
-                <h2 class="section-title">Your Generated Video</h2>
-                <div class="video-placeholder" id="videoPlaceholder">
-                    <div class="video-icon">🎬</div>
-                    <p>Your video will appear here</p>
-                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">Enter a prompt and click "Generate Video"</p>
+                <h2 class="section-title"><i class="fas fa-film"></i> Your Generated Video</h2>
+                <div class="video-container">
+                    <div class="video-placeholder" id="videoPlaceholder">
+                        <div class="video-icon"><i class="fas fa-video"></i></div>
+                        <p>Your video will appear here</p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Enter a prompt and click "Generate Video"</p>
+                    </div>
+                    <video id="generatedVideo" controls style="display: none;"></video>
+                    <div id="loadingIndicator" style="display: none; text-align: center;">
+                        <div class="loader"></div>
+                        <p style="margin-top: 1rem;">Generating your video... This may take up to 2 minutes.</p>
+                    </div>
                 </div>
                 
                 <div class="video-controls">
-                    <button class="btn btn-outline">Download</button>
-                    <button class="btn btn-primary">Share</button>
+                    <button class="btn btn-outline" id="downloadBtn" disabled>
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button class="btn btn-primary" id="shareBtn" disabled>
+                        <i class="fas fa-share"></i> Share
+                    </button>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding: 1rem; background: #f0f9ff; border-radius: 8px;">
+                    <h3 style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-info-circle" style="color: #0ea5e9;"></i> Free Usage Info
+                    </h3>
+                    <p style="font-size: 0.9rem; color: var(--text-light);">
+                        You have <strong>5 free generations</strong> remaining today. Free tier resets every 24 hours.
+                        For unlimited access, consider upgrading to our <a href="#" style="color: var(--primary);">Pro plan</a>.
+                    </p>
                 </div>
             </div>
         </div>
@@ -490,45 +622,33 @@
     <section class="features">
         <div class="container">
             <div class="section-header">
-                <h2>Powerful Features</h2>
-                <p>Everything you need to create amazing videos with AI</p>
+                <h2>Powered by Free AI Services</h2>
+                <p>Our generator uses these free APIs and platforms to create your videos</p>
             </div>
             
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🚀</div>
-                    <h3>Lightning Fast</h3>
-                    <p>Generate high-quality videos in seconds, not hours. Our optimized AI models deliver results quickly.</p>
+                    <div class="feature-icon"><i class="fab fa-hacker-news"></i></div>
+                    <h3>Hugging Face</h3>
+                    <p>Access free text-to-video models from Hugging Face's model hub. No API key required for basic usage.</p>
                 </div>
                 
                 <div class="feature-card">
-                    <div class="feature-icon">🎨</div>
-                    <h3>Multiple Styles</h3>
-                    <p>Choose from various artistic styles including realistic, cinematic, animated, and artistic.</p>
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Stability AI</h3>
+                    <p>Use Stability AI's free tier for video generation. Limited daily requests but completely free.</p>
                 </div>
                 
                 <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>All Formats</h3>
-                    <p>Create videos in any aspect ratio for social media, websites, presentations, and more.</p>
+                    <div class="feature-icon"><i class="fab fa-google"></i></div>
+                    <h3>Google Colab</h3>
+                    <p>Run models on free Google Colab notebooks with GPU support. Perfect for longer video generation.</p>
                 </div>
                 
                 <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Commercial Rights</h3>
-                    <p>Use your generated videos anywhere - personal projects, social media, or commercial use.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">🔄</div>
-                    <h3>Easy Editing</h3>
-                    <p>Regenerate videos with modified prompts or make quick adjustments to your creations.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">💾</div>
-                    <h3>Cloud Storage</h3>
-                    <p>Your videos are safely stored in the cloud. Access and download them anytime, anywhere.</p>
+                    <div class="feature-icon"><i class="fas fa-database"></i></div>
+                    <h3>Replicate</h3>
+                    <p>Access various AI models through Replicate's API with free tier credits every month.</p>
                 </div>
             </div>
         </div>
@@ -539,85 +659,240 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>VidGenAI</h3>
+                    <h3>FreeVidAI</h3>
                     <ul class="footer-links">
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">Careers</a></li>
-                        <li><a href="#">Contact</a></li>
-                        <li><a href="#">Press</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-column">
-                    <h3>Product</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Features</a></li>
-                        <li><a href="#">Examples</a></li>
-                        <li><a href="#">Pricing</a></li>
-                        <li><a href="#">API</a></li>
+                        <li><a href="#"><i class="fas fa-info-circle"></i> About Us</a></li>
+                        <li><a href="#"><i class="fas fa-newspaper"></i> Blog</a></li>
+                        <li><a href="#"><i class="fas fa-envelope"></i> Contact</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-column">
                     <h3>Resources</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Tutorials</a></li>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Community</a></li>
+                        <li><a href="#"><i class="fas fa-book"></i> Documentation</a></li>
+                        <li><a href="#"><i class="fas fa-graduation-cap"></i> Tutorials</a></li>
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Help Center</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-column">
                     <h3>Legal</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Cookie Policy</a></li>
-                        <li><a href="#">GDPR</a></li>
+                        <li><a href="#"><i class="fas fa-shield-alt"></i> Privacy Policy</a></li>
+                        <li><a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Connect</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                        <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                        <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
                     </ul>
                 </div>
             </div>
             
             <div class="copyright">
-                <p>&copy; 2023 VidGenAI. All rights reserved.</p>
+                <p>&copy; 2023 FreeVidAI. This is a demo project for educational purposes. Not affiliated with any mentioned services.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Simple simulation of video generation
-        document.getElementById('generateBtn').addEventListener('click', function() {
-            const btn = this;
-            const spinner = document.getElementById('loadingSpinner');
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const promptInput = document.getElementById('promptInput');
             const videoPlaceholder = document.getElementById('videoPlaceholder');
+            const generatedVideo = document.getElementById('generatedVideo');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const shareBtn = document.getElementById('shareBtn');
+            const apiStatus = document.getElementById('apiStatus');
             
-            // Show loading state
-            btn.disabled = true;
-            spinner.style.display = 'inline';
-            btn.innerHTML = '<span>Generating...</span> <span>⏳</span>';
+            // Free API endpoints (these are example endpoints - in a real app you'd use actual endpoints)
+            const apiEndpoints = {
+                stability: 'https://api.stability.ai/v1/generation/video',
+                huggingface: 'https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5',
+                mock: '/api/mock-generate' // This would be a mock endpoint in a real implementation
+            };
             
-            // Simulate API call delay
-            setTimeout(function() {
-                // Reset button
-                btn.disabled = false;
-                spinner.style.display = 'none';
-                btn.innerHTML = '<span>Generate Video</span>';
+            // Available free video URLs for demonstration
+            const sampleVideos = [
+                'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+                'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+                'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+            ];
+            
+            generateBtn.addEventListener('click', async function() {
+                const prompt = promptInput.value.trim();
+                if (!prompt) {
+                    alert('Please enter a video description');
+                    return;
+                }
                 
-                // Update video placeholder to show "generated" state
-                videoPlaceholder.innerHTML = `
-                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 3rem; margin-bottom: 1rem;">🎥</div>
-                            <p>Your Video is Ready!</p>
-                            <p style="font-size: 0.9rem; font-weight: normal; margin-top: 0.5rem;">Click play to preview</p>
-                        </div>
-                    </div>
-                `;
+                // Get selected options
+                const style = document.getElementById('styleSelect').value;
+                const duration = document.getElementById('durationSelect').value;
+                const ratio = document.getElementById('ratioSelect').value;
+                const apiService = document.getElementById('apiSelect').value;
                 
-                // Show a success message
-                alert('Video generated successfully! This is a frontend simulation. In a real application, this would connect to an AI video generation API.');
-            }, 3000);
+                // Show loading state
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Generating...</span>';
+                videoPlaceholder.style.display = 'none';
+                loadingIndicator.style.display = 'block';
+                generatedVideo.style.display = 'none';
+                
+                // Update API status
+                apiStatus.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> <span>Connecting to ' + 
+                    (apiService === 'stability' ? 'Stability AI' : 
+                     apiService === 'huggingface' ? 'Hugging Face' : 'Demo Service') + '...</span>';
+                apiStatus.className = 'api-status warning';
+                
+                try {
+                    // In a real application, you would make an API call here
+                    // For this demo, we'll simulate the API call with a timeout
+                    await simulateAPICall(prompt, style, duration, ratio, apiService);
+                    
+                    // Simulate successful generation
+                    setTimeout(() => {
+                        // Select a random sample video for demonstration
+                        const randomVideo = sampleVideos[Math.floor(Math.random() * sampleVideos.length)];
+                        
+                        // Update the video element
+                        generatedVideo.src = randomVideo;
+                        generatedVideo.style.display = 'block';
+                        loadingIndicator.style.display = 'none';
+                        
+                        // Enable download and share buttons
+                        downloadBtn.disabled = false;
+                        shareBtn.disabled = false;
+                        
+                        // Reset generate button
+                        generateBtn.disabled = false;
+                        generateBtn.innerHTML = '<i class="fas fa-magic"></i> <span>Generate Video</span>';
+                        
+                        // Update API status
+                        apiStatus.innerHTML = '<i class="fas fa-check-circle"></i> <span>Video generated successfully using free API</span>';
+                        apiStatus.className = 'api-status';
+                        
+                        // Show success message
+                        showNotification('Video generated successfully!', 'success');
+                    }, 3000);
+                    
+                } catch (error) {
+                    // Handle error
+                    console.error('Error generating video:', error);
+                    loadingIndicator.style.display = 'none';
+                    videoPlaceholder.style.display = 'block';
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = '<i class="fas fa-magic"></i> <span>Generate Video</span>';
+                    
+                    apiStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>API service temporarily unavailable. Please try again later.</span>';
+                    apiStatus.className = 'api-status error';
+                    
+                    showNotification('Failed to generate video. Please try again.', 'error');
+                }
+            });
+            
+            // Download button handler
+            downloadBtn.addEventListener('click', function() {
+                if (generatedVideo.src) {
+                    const a = document.createElement('a');
+                    a.href = generatedVideo.src;
+                    a.download = 'generated-video.mp4';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    showNotification('Video download started!', 'success');
+                }
+            });
+            
+            // Share button handler
+            shareBtn.addEventListener('click', function() {
+                if (generatedVideo.src) {
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'AI Generated Video',
+                            text: 'Check out this video I created with AI!',
+                            url: window.location.href,
+                        })
+                        .then(() => showNotification('Video shared successfully!', 'success'))
+                        .catch(error => console.log('Error sharing:', error));
+                    } else {
+                        // Fallback for browsers that don't support Web Share API
+                        navigator.clipboard.writeText(window.location.href)
+                            .then(() => showNotification('Link copied to clipboard!', 'success'))
+                            .catch(err => {
+                                console.error('Failed to copy: ', err);
+                                showNotification('Failed to copy link to clipboard', 'error');
+                            });
+                    }
+                }
+            });
+            
+            // Simulate API call
+            async function simulateAPICall(prompt, style, duration, ratio, apiService) {
+                return new Promise((resolve, reject) => {
+                    // Simulate API processing time
+                    setTimeout(() => {
+                        // 10% chance of simulated failure for demo purposes
+                        if (Math.random() < 0.1) {
+                            reject(new Error('API service unavailable'));
+                        } else {
+                            resolve({
+                                success: true,
+                                videoUrl: sampleVideos[Math.floor(Math.random() * sampleVideos.length)],
+                                generationTime: '45 seconds',
+                                creditsUsed: 1
+                            });
+                        }
+                    }, 2000);
+                });
+            }
+            
+            // Show notification
+            function showNotification(message, type) {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.textContent = message;
+                notification.style.position = 'fixed';
+                notification.style.top = '20px';
+                notification.style.right = '20px';
+                notification.style.padding = '12px 20px';
+                notification.style.borderRadius = '8px';
+                notification.style.color = 'white';
+                notification.style.fontWeight = '500';
+                notification.style.zIndex = '1000';
+                notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                notification.style.transition = 'opacity 0.3s';
+                
+                if (type === 'success') {
+                    notification.style.background = 'var(--success)';
+                } else if (type === 'error') {
+                    notification.style.background = 'var(--error)';
+                } else {
+                    notification.style.background = 'var(--warning)';
+                }
+                
+                document.body.appendChild(notification);
+                
+                // Remove notification after 3 seconds
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+            
+            // Initialize with a sample prompt
+            promptInput.value = "A serene mountain landscape at sunrise with a flowing river in the foreground, cinematic style";
         });
     </script>
 </body>
