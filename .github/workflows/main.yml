@@ -1,0 +1,199 @@
+name: YouTube Video Downloader
+on:
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: 'YouTube Video URL'
+        required: true
+        type: string
+      output_format:
+        description: 'Output Format'
+        required: false
+        default: 'mp4'
+        type: choice
+        options:
+        - mp4
+        - webm
+        - mp3
+        - m4a
+
+jobs:
+  download-videos:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          ffmpeg \
+          aria2 \
+          curl \
+          wget \
+          atomicparsley
+
+    - name: Install Python packages
+      run: |
+        python -m pip install --upgrade pip
+        pip install \
+          yt-dlp \
+          pytube \
+          youtube_dl \
+          youtubesearchpython \
+          pyyaml \
+          requests
+
+    - name: Create downloads directory
+      run: mkdir -p downloads
+
+    # METHOD 1: yt-dlp - Basic download
+    - name: Method 1 - yt-dlp basic download
+      run: |
+        yt-dlp -o "downloads/method1_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 2: yt-dlp - Specific format
+    - name: Method 2 - yt-dlp specific format
+      run: |
+        yt-dlp -f "best[height<=720]" -o "downloads/method2_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 3: yt-dlp - Audio only
+    - name: Method 3 - yt-dlp audio extraction
+      run: |
+        yt-dlp -x --audio-format mp3 -o "downloads/method3_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 4: yt-dlp - Best quality
+    - name: Method 4 - yt-dlp best quality
+      run: |
+        yt-dlp -f "best" -o "downloads/method4_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 5: yt-dlp - Playlist download
+    - name: Method 5 - yt-dlp playlist (first 3)
+      if: contains(inputs.video_url, 'list=')
+      run: |
+        yt-dlp --playlist-end 3 -o "downloads/method5_%(playlist_index)s_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 6: yt-dlp - With metadata
+    - name: Method 6 - yt-dlp with metadata
+      run: |
+        yt-dlp --add-metadata --embed-thumbnail -o "downloads/method6_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 7: yt-dlp - Custom filename
+    - name: Method 7 - yt-dlp custom filename
+      run: |
+        yt-dlp -o "downloads/custom_video_%(upload_date)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 8: Pytube - Basic download
+    - name: Method 8 - Pytube basic download
+      run: |
+        python -c "
+        from pytube import YouTube
+        yt = YouTube('${{ inputs.video_url }}')
+        stream = yt.streams.get_highest_resolution()
+        stream.download(output_path='downloads', filename='method8_pytube_video')
+        "
+
+    # METHOD 9: Pytube - Audio only
+    - name: Method 9 - Pytube audio download
+      run: |
+        python -c "
+        from pytube import YouTube
+        yt = YouTube('${{ inputs.video_url }}')
+        audio = yt.streams.filter(only_audio=True).first()
+        audio.download(output_path='downloads', filename='method9_pytube_audio')
+        "
+
+    # METHOD 10: Pytube - Specific resolution
+    - name: Method 10 - Pytube 720p download
+      run: |
+        python -c "
+        from pytube import YouTube
+        yt = YouTube('${{ inputs.video_url }}')
+        stream = yt.streams.filter(res='720p', file_extension='mp4').first()
+        if stream:
+            stream.download(output_path='downloads', filename='method10_720p_video')
+        "
+
+    # METHOD 11: youtube-dl (legacy) - Basic
+    - name: Method 11 - youtube-dl basic
+      run: |
+        youtube-dl -o "downloads/method11_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 12: yt-dlp - Subtitle download
+    - name: Method 12 - yt-dlp with subtitles
+      run: |
+        yt-dlp --write-sub --write-auto-sub --sub-lang en -o "downloads/method12_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 13: yt-dlp - Thumbnail only
+    - name: Method 13 - yt-dlp thumbnail download
+      run: |
+        yt-dlp --write-thumbnail --skip-download -o "downloads/method13_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 14: yt-dlp - Download description
+    - name: Method 14 - yt-dlp metadata download
+      run: |
+        yt-dlp --write-description --write-info-json --skip-download -o "downloads/method14_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 15: yt-dlp - Batch download from file
+    - name: Method 15 - yt-dlp batch download
+      run: |
+        echo "${{ inputs.video_url }}" > url_list.txt
+        yt-dlp -a url_list.txt -o "downloads/method15_%(title)s.%(ext)s"
+
+    # METHOD 16: yt-dlp - Speed limited download
+    - name: Method 16 - yt-dlp rate limited
+      run: |
+        yt-dlp --limit-rate 1M -o "downloads/method16_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 17: yt-dlp - Download fragments with aria2c
+    - name: Method 17 - yt-dlp with aria2c
+      run: |
+        yt-dlp --external-downloader aria2c --external-downloader-args '-x 16' -o "downloads/method17_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 18: Custom Python script with requests
+    - name: Method 18 - Custom Python downloader
+      run: |
+        python << 'EOF'
+        import yt_dlp
+        import os
+        
+        def download_video(url, method_name):
+            ydl_opts = {
+                'outtmpl': f'downloads/{method_name}_%(title)s.%(ext)s',
+                'format': 'best[height<=480]',
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
+        
+        download_video('${{ inputs.video_url }}', 'method18_custom_python')
+        EOF
+
+    # METHOD 19: yt-dlp - Download chapters separately
+    - name: Method 19 - yt-dlp split chapters
+      run: |
+        yt-dlp --split-chapters -o "downloads/method19_%(title)s_%(section_number)s_%(section_title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    # METHOD 20: yt-dlp - Custom post-processing
+    - name: Method 20 - yt-dlp with custom postprocess
+      run: |
+        yt-dlp --exec 'echo \"Downloaded: {}\"' -o "downloads/method20_%(title)s.%(ext)s" "${{ inputs.video_url }}"
+
+    - name: List downloaded files
+      run: |
+        echo "=== Downloaded Files ==="
+        ls -la downloads/
+        echo "=== File Sizes ==="
+        du -h downloads/* || true
+
+    - name: Upload downloads as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: youtube-downloads
+        path: downloads/
+        retention-days: 1
