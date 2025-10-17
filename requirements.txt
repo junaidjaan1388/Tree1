@@ -1,3 +1,11 @@
+yt-dlp>=2023.11.16
+pytube>=15.0.0
+youtube_dl>=2021.12.17
+youtubesearchpython>=1.6.5
+requests>=2.31.0
+PyYAML>=6.0
+
+
 torch>=2.0.0
 torchvision>=0.15.0
 diffusers>=0.20.0
