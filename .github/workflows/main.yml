@@ -45,8 +45,6 @@ jobs:
         pip install \
           yt-dlp \
           pytube \
-          youtube_dl \
-          youtubesearchpython \
           pyyaml \
           requests
 
