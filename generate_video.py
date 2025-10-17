@@ -1,39 +1,83 @@
-# scripts/generate_video.py
-import argparse
-import torch
-from diffusers import DiffusionPipeline
-import os
+#!/usr/bin/env python3
+"""
+Advanced YouTube Downloader with multiple methods
+"""
 
-def generate_video(prompt: str, output_dir: str = "outputs"):
-    os.makedirs(output_dir, exist_ok=True)
+import yt_dlp
+import pytube
+import os
+from pathlib import Path
+
+class AdvancedYouTubeDownloader:
+    def __init__(self, output_dir="downloads"):
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(exist_ok=True)
     
-    # Initialize the pipeline (example using a text-to-video model)
-    pipe = DiffusionPipeline.from_pretrained(
-        "damo-vilab/text-to-video-ms-1.7b",
-        torch_dtype=torch.float16,
-        variant="fp16"
-    )
-    pipe = pipe.to("cuda")
+    def method_ytdlp_best(self, url):
+        """Method 1: yt-dlp best quality"""
+        ydl_opts = {
+            'outtmpl': str(self.output_dir / 'ytdlp_best_%(title)s.%(ext)s'),
+            'format': 'best',
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
     
-    # Generate video
-    video_frames = pipe(
-        prompt,
-        num_inference_steps=50,
-        num_frames=24,
-        height=256,
-        width=256
-    ).frames
+    def method_ytdlp_720p(self, url):
+        """Method 2: yt-dlp 720p"""
+        ydl_opts = {
+            'outtmpl': str(self.output_dir / 'ytdlp_720p_%(title)s.%(ext)s'),
+            'format': 'best[height<=720]',
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
     
-    # Save video
-    output_path = os.path.join(output_dir, "generated_video.mp4")
-    # Add code to save frames as video using OpenCV or similar
+    def method_ytdlp_audio(self, url):
+        """Method 3: yt-dlp audio only"""
+        ydl_opts = {
+            'outtmpl': str(self.output_dir / 'ytdlp_audio_%(title)s.%(ext)s'),
+            'format': 'bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+            }],
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
     
-    return output_path
+    def method_pytube_hd(self, url):
+        """Method 4: Pytube HD"""
+        yt = pytube.YouTube(url)
+        stream = yt.streams.get_highest_resolution()
+        stream.download(output_path=str(self.output_dir), filename='pytube_hd_video')
+    
+    def method_pytube_audio(self, url):
+        """Method 5: Pytube audio"""
+        yt = pytube.YouTube(url)
+        audio_stream = yt.streams.filter(only_audio=True).first()
+        audio_stream.download(output_path=str(self.output_dir), filename='pytube_audio')
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--prompt", type=str, required=True)
-    args = parser.parse_args()
+    import sys
+    if len(sys.argv) != 2:
+        print("Usage: python advanced_downloader.py <YouTube_URL>")
+        sys.exit(1)
     
-    output_path = generate_video(args.prompt)
-    print(f"Video generated: {output_path}")
+    downloader = AdvancedYouTubeDownloader()
+    url = sys.argv[1]
+    
+    # Execute all methods
+    methods = [
+        downloader.method_ytdlp_best,
+        downloader.method_ytdlp_720p,
+        downloader.method_ytdlp_audio,
+        downloader.method_pytube_hd,
+        downloader.method_pytube_audio,
+    ]
+    
+    for method in methods:
+        try:
+            print(f"Executing {method.__name__}...")
+            method(url)
+            print(f"✓ {method.__name__} completed")
+        except Exception as e:
+            print(f"✗ {method.__name__} failed: {e}")
